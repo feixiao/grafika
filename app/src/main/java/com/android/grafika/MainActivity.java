@@ -16,15 +16,22 @@
 
 package com.android.grafika;
 
-import android.os.Bundle;
+import android.Manifest;
 import android.app.ListActivity;
 import android.content.Intent;
-import android.util.Log;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
+import com.hjq.toast.ToastUtils;
+
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -144,6 +151,39 @@ public class MainActivity extends ListActivity {
         if (!cm.isContentCreated(this)) {
             ContentManager.getInstance().createAll(this);
         }
+
+        ToastUtils.init(getApplication());
+
+
+        XXPermissions.with(this)
+                // 申请单个权限
+                .permission(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                // 设置权限请求拦截器（局部设置）
+                //.interceptor(new PermissionInterceptor())
+                // 设置不触发错误检测机制（局部设置）
+                //.unchecked()
+                .request(new OnPermissionCallback() {
+
+                    @Override
+                    public void onGranted(List<String> permissions, boolean all) {
+                        if (all) {
+//                            ToastUtils.show("获取录音和日历权限成功");
+                        } else {
+//                            ToastUtils.show("获取部分权限成功，但部分权限未正常授予");
+                        }
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions, boolean never) {
+                        if (never) {
+//                            ToastUtils.show("被永久拒绝授权，请手动授予录音和日历权限");
+                            // 如果是被永久拒绝就跳转到应用权限系统设置页面
+                            XXPermissions.startPermissionActivity(getBaseContext(), permissions);
+                        } else {
+//                            ToastUtils.show("获取录音和日历权限失败");
+                        }
+                    }
+                });
     }
 
     /**
