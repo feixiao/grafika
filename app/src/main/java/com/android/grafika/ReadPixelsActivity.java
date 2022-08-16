@@ -16,6 +16,7 @@
 
 package com.android.grafika;
 
+import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,6 +51,8 @@ public class ReadPixelsActivity extends Activity {
     private static final int ITERATIONS = 100;
 
     private volatile boolean mIsCanceled;
+
+
 
 
     @Override
@@ -113,6 +116,18 @@ public class ReadPixelsActivity extends Activity {
         private AlertDialog mDialog;
 
         private ProgressBar mProgressBar;
+
+
+        private Bitmap readBufferPixelToBitmap(int width, int height) {
+            ByteBuffer buf = ByteBuffer.allocateDirect(width * height * 4);
+            buf.order(ByteOrder.LITTLE_ENDIAN);
+            GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buf);
+            buf.rewind();
+
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            bmp.copyPixelsFromBuffer(buf);
+            return bmp;
+        }
 
         /**
          * Prepare for the glReadPixels test.
@@ -231,6 +246,8 @@ public class ReadPixelsActivity extends Activity {
             }
             Log.d(TAG, "done");
 
+
+            Bitmap bitmap = readBufferPixelToBitmap(480, 640);
             if (true) {
                 // save the last one off into a file
                 long startWhen = System.nanoTime();
@@ -246,4 +263,7 @@ public class ReadPixelsActivity extends Activity {
             return totalTime;
         }
     }
+
+
+
 }
